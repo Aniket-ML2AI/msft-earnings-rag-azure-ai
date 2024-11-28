@@ -1,0 +1,15 @@
+openai
+python-dotenv
+azure-core 
+azure-storage-blob 
+azure-mgmt-resource 
+azure-identity
+requests
+langchain_community
+langchain-openai
+ragas
+langchain
+langchain-core
+azure-search-documents
+langfuse
+nemoguardrails
