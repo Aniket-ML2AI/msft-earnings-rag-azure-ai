@@ -99,7 +99,7 @@ vector_search = VectorSearch(
         ],
     )
 
-index_name = "earning_call-scoring-profile"
+index_name = config['SEARCH_INDEX_NAME']
 vector_store: AzureSearch = AzureSearch(
     azure_search_endpoint='https://azure-ai-rag-search-service.search.windows.net',
     azure_search_key=config['SEARCH_ADMIN_KEY'],
@@ -118,12 +118,17 @@ with open (file_path, 'r', encoding='utf-8') as file:
     json_data = json.load(file)
 
 def json_to_documents(json_data):
-    documents = [
-        Document(page_content=doc["content"], metadata=doc["metadata"])  # Convert each dict back to Document
-        for doc in json_data
-    ]
-    return documents
+    documents = []
+    ids =[]
+    for doc in json_data:
+        documents.append(Document(page_content=doc["content"], metadata=doc["metadata"]))
+        ids.append(doc['metadata']['id'])
 
-documents = json_to_documents(json_data)
-vector_store.add_documents(documents)
+    return documents,ids
 
+documents,ids = json_to_documents(json_data)
+vector_store.add_documents(documents, id =ids)
+
+retriever = vector_store.as_retriever()
+
+print (retriever.invoke('How is Windows OEM revenue growth?'))

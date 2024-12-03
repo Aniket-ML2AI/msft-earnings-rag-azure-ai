@@ -8,6 +8,7 @@ from util.logger import logging
 import json
 from azure.storage.blob import BlobServiceClient,BlobClient,ContainerClient, ContentSettings
 import uuid
+import re
 
 def split_doc(filename_):
     print (f'Reading - {filename_}')
@@ -22,6 +23,13 @@ def add_metadata(data,time):
         chunk.metadata['last_update'] = time
     return data
 
+def add_ids(data):
+    for index, chunk in enumerate(data):
+        match = re.search(r"\\([^\\]+)\.",chunk.metadata['source'])
+        if match:
+            chunk.metadata['id'] = f"doc-{index+1}-{match.group(1)}"
+    return data
+
 q2_time = (datetime.utcnow() - timedelta(days=90)).strftime("%Y-%m-%dT%H:%M:%S-00:00")
 q1_time = (datetime.utcnow() - timedelta(days=180)).strftime("%Y-%m-%dT%H:%M:%S-00:00")
 
@@ -30,6 +38,9 @@ msft_q2 = split_doc('data\MSFT_q2_2024.txt')
 
 msft_q1 = add_metadata(msft_q1,q1_time)
 msft_q2 = add_metadata(msft_q2,q2_time)
+
+msft_q1 = add_ids(msft_q1)
+msft_q2 = add_ids(msft_q2)
 
 documents = msft_q1+msft_q2
 
@@ -42,7 +53,6 @@ def document_to_json(documents):
     document_list = []
     for doc in documents:
         doc_dict = {
-            "id":str(uuid.uuid4()),
             "metadata":doc.metadata,
             "content":doc.page_content
         }

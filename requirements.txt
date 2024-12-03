@@ -13,3 +13,5 @@ langchain-core
 azure-search-documents
 langfuse
 nemoguardrails
+rapidfuzz
+openpyxl
